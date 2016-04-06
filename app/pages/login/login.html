@@ -1,0 +1,22 @@
+<ion-navbar *navbar yqc-primary>
+  <ion-title>
+    YQC
+  </ion-title>
+</ion-navbar>
+
+<div class="login">
+  <ion-list>
+    <ion-item>
+      <ion-input [(ngModel)]="user.name" type="text" placeholder="Username"></ion-input>
+    </ion-item>
+    <ion-item>
+      <ion-input [(ngModel)]="user.password" type="password" placeholder="Password"></ion-input>
+    </ion-item>
+  </ion-list>
+
+  <div padding>
+    <button danger block (click)="goToTabs()">
+      Log-in
+    </button>
+  </div>
+</div>

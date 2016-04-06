@@ -1,0 +1,24 @@
+<ion-navbar *navbar yqc-primary>
+  <ion-title>
+    Transfer
+  </ion-title>
+
+  <ion-buttons end>
+    <button>
+      {{currencyName}} {{balance}}
+    </button>
+  </ion-buttons>
+</ion-navbar>
+
+<ion-content padding class="transfer">
+  <div class="status" style="position: relative; top: 25vh;">
+    <button padding danger outline block (click)="doDeposit()" style="margin-bottom: 10px;">
+      <ion-icon name="ios-alert-outline"></ion-icon>
+      Deposit
+    </button>
+    <button padding danger outline block (click)="doWithdraw()">
+      <ion-icon name="alert"></ion-icon>
+      Withdraw
+    </button>
+  </div>
+</ion-content>
