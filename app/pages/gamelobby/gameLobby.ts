@@ -1,22 +1,68 @@
-import {Page} from 'ionic-angular';
-import {Component, OnInit} from 'angular2/core';
+import {Page, Events} from 'ionic-angular';
+import {Component, OnInit, Input} from 'angular2/core';
+import {HttpPost} from '../shared/post';
+import {AuthCommonJwt} from '../shared/commonJwt';
+import {Toast} from 'ionic-native';
 
 declare var $;
 
 @Page({
   templateUrl: 'build/pages/gamelobby/gameLobby.html',
+  providers: [
+    HttpPost
+  ]
 })
 export class GameLobby implements OnInit {
-  constructor() {}
+  constructor(
+    private _events: Events,
+    private _httpPost: HttpPost,
+    private _authCommonJwt: AuthCommonJwt) {}
+
+  private URL: any = null;
+  private toast: any = null;
+  @Input() balance: string = null;
+  @Input() currencyName: string = null;
 
   ngOnInit() {
-    console.log('canino');
+    this.balance      = this._authCommonJwt.getToken('balance');
+    this.currencyName = this._authCommonJwt.getToken('currency_name');
+    this._events.subscribe('user:balance', (balance) => {
+      this.balance = balance[0];
+    });
   }
 
   start() {
-    let urlWindow = window.open('http://cashapi.dg20mu.com/cashapi/DoBusiness.aspx?params=YWdlbnQ9Z290ZXlxYyR1c2VybmFtZT1UTkExQTJQMSRwYXNzd29yZD0xYmJkODg2NDYwODI3MDE1ZTVkNjA1ZWQ0NDI1MjI1MSRkb21haW49Y2FzaGFwaS5kZzIwbXUuY29tJGlmcmFtZT0xJGdhbWV0eXBlPTEkZ2FtZWtpbmQ9MCRwbGF0Zm9ybW5hbWU9YWckbGFuZz1udWxsJG1ldGhvZD10Zw==&key=f18fe10040dd8fb698ecc0ece47e018e','_blank', 'hardware=no,location=no');
-    urlWindow.addEventListener('loadstop', function(event) {
-      console.log(event);
+    let self = this;
+    window['plugins'].spinnerDialog.show('', 'Accessing Game...', true);
+    this._httpPost.gameLauncher('AG')
+      .then(launcher => {
+        window['plugins'].spinnerDialog.hide();
+        /**
+         * set the iframe
+         */
+        let bool: boolean = launcher;
+        let response: any = <any> bool;
+
+        this.URL = response.data.url;
+        console.log(this.URL);
+        let urlWindow = window.open(this.URL,'_blank', 'hardware=no,location=no,clearcache=yes');
+        urlWindow.addEventListener('loadstart', function(event) {
+          self.toast = Toast.show('Loading... Please wait.', 'short', 'center').subscribe(
+            toast => {
+            });
+        });
+        urlWindow.addEventListener('loadstop', function(event) {
+          Toast.hide()
+            .then(function(message) {
+              console.log('hide toast');
+            });
+        });
+
+        urlWindow.addEventListener('loaderror', function(event) {
+          console.log('loaderror');
+          urlWindow.close();
+          window['plugins'].spinnerDialog.show('', 'Server Error. Please try again...');
+        });
     });
   }
 }
