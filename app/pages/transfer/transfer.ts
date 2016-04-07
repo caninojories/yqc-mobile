@@ -1,33 +1,36 @@
-import {Page, Alert, NavController} from 'ionic-angular';
+import {Page, Alert, NavController, Events} from 'ionic-angular';
 import {OnInit, Input} from 'angular2/core';
 import {HttpGet} from '../shared/get';
+import {HttpPost} from '../shared/post';
 import {AuthCommonJwt} from '../shared/commonJwt';
 
 @Page({
   templateUrl: 'build/pages/transfer/transfer.html',
   providers: [
-    HttpGet
+    HttpGet,
+    HttpPost
   ]
 })
 export class Transfer implements OnInit  {
   constructor(
+    private _events: Events,
     private _nav: NavController,
     private _httpGet: HttpGet,
+    private _httpPost: HttpPost,
     private _authCommonJwt: AuthCommonJwt) {}
 
-  @Input() balance: number = 0;
+  @Input() balance: string = null;
+  private intBalance: number = 0;
+  private URL: string = null;
   @Input() currencyName: string = null;
 
   ngOnInit() {
     this.balance = this._authCommonJwt.getToken('balance');
+    this.balance = parseFloat(this.balance).toFixed(2);
     this.currencyName = this._authCommonJwt.getToken('currency_name');
-    console.log(this.currencyName);
-  }
 
-  start() {
-    let urlWindow = window.open('http://cashapi.dg20mu.com/cashapi/DoBusiness.aspx?params=YWdlbnQ9Z290ZXlxYyR1c2VybmFtZT1UTkExQTJQMSRwYXNzd29yZD0xYmJkODg2NDYwODI3MDE1ZTVkNjA1ZWQ0NDI1MjI1MSRkb21haW49Y2FzaGFwaS5kZzIwbXUuY29tJGlmcmFtZT0xJGdhbWV0eXBlPTEkZ2FtZWtpbmQ9MCRwbGF0Zm9ybW5hbWU9YWckbGFuZz1udWxsJG1ldGhvZD10Zw==&key=f18fe10040dd8fb698ecc0ece47e018e','_blank', 'hardware=no,location=no');
-    urlWindow.addEventListener('loadstop', function(event) {
-      console.log(event);
+    this._events.subscribe('user:balance', (balance) => {
+      this.balance = balance[0];
     });
   }
 
@@ -61,6 +64,7 @@ export class Transfer implements OnInit  {
   }
 
   doProcess(amount, provider, type) {
+    let self = this;
     let beginTransferTime = performance.now();
     window['plugins'].spinnerDialog.show('', 'Transfering...', true);
 
@@ -71,12 +75,22 @@ export class Transfer implements OnInit  {
 
       if (response.data.transferStatus === 1) {
         if (type === 'deposit') {
-          this.balance = this.balance - amount;
+          self.intBalance = parseFloat(self.balance) - amount;
+          self.balance = self.intBalance.toFixed(2);
+          self._authCommonJwt.setToken('balance', self.balance);
+          this._events.publish('user:balance', self.balance);
+          /**
+           * Tweak the launch game
+           */
+          window['plugins'].spinnerDialog.hide();
+          this.launchGame();
         } else if (type === 'withdraw') {
-          this.balance = this.balance + parseFloat(amount);
+          self.intBalance = parseFloat(self.balance) + parseFloat(amount);
+          self.balance    = self.intBalance.toFixed(2);
+          self._authCommonJwt.setToken('balance', self.balance);
+          this._events.publish('user:balance', self.balance);
+          window['plugins'].spinnerDialog.hide();
         }
-
-        window['plugins'].spinnerDialog.hide();
       }
     })
     .catch(error => {
@@ -92,7 +106,7 @@ export class Transfer implements OnInit  {
       setTimeout(function() {
         let message = null;
         if (error.jsonBody && error.jsonBody.message === 'no_enough_credit') {
-          message = 'No Enough Credit';
+          message = 'Not Enough Credit';
         } else {
           message = 'Something went wrong. Please try again...';
         }
@@ -159,5 +173,32 @@ export class Transfer implements OnInit  {
     });
 
     this._nav.present(prompt);
+  }
+
+  launchGame() {
+    window['plugins'].spinnerDialog.show('', 'Validating in game balance...', true);
+    this._httpPost.gameLauncher('AG')
+      .then(launcher => {
+      /**
+       * set the iframe
+       */
+      let bool: boolean = launcher;
+      let response: any = <any> bool;
+
+      this.URL = response.data.url;
+      console.log(this.URL);
+      let urlWindow = window.open(this.URL,'_blank', 'hardware=no,location=no,clearcache=yes,hidden=yes');
+      urlWindow.addEventListener('loadstop', function(event) {
+        urlWindow.close();
+        window['plugins'].spinnerDialog.hide();
+      });
+
+      urlWindow.addEventListener('loaderror', function(event) {
+        window['plugins'].spinnerDialog.show('', 'Something went wrong. Please try again');
+      });
+    })
+    .catch(error => {
+      window['plugins'].spinnerDialog.show('', 'Something went wrong. Please try again');
+    });
   }
 }
