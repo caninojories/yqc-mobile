@@ -30,7 +30,8 @@
     "cordova-plugin-crosswalk-webview",
     "cordova-plugin-inappbrowser",
     "cordova-plugin-screen-orientation",
-    "cordova-plugin-spinner-dialog"
+    "cordova-plugin-spinner-dialog",
+    "cordova-plugin-x-toast"
   ],
   "cordovaPlatforms": [
     "ios",
@@ -46,5 +47,5 @@
     }
   ],
   "name": "yqc-mobile",
-  "description": "yqc-mobile: An Ionic project"
+  "description": "yqc-mobile"
 }
