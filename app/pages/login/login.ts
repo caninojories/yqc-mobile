@@ -41,11 +41,12 @@ export class Login implements OnInit  {
 
   goToTabs() {
     window['plugins'].spinnerDialog.show('Login', 'Please wait...', true);
+    let self = this;
     this._httpGet.login(this.user)
       .then(user => {
         let bool: boolean = user;
-         let response: any = <any> bool;
-         this._authJwtToken.setToken(response.data.token);
+        let response: any = <any> bool;
+        this._authJwtToken.setToken(response.data.token);
 
         if (user) {
           window['plugins'].spinnerDialog.hide();
@@ -55,8 +56,8 @@ export class Login implements OnInit  {
           this._nav.push(TabsPage);
 
           setTimeout(function() {
-            this.user.name      = '';
-            this.user.password  = '';
+            self.user.name      = '';
+            self.user.password  = '';
           }, 1000);
         }
       })
