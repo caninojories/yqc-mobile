@@ -1,16 +1,23 @@
-<ion-navbar *navbar yqc-primary>
+<ion-navbar *navbar yqc-header>
   <ion-title>
     Settings
   </ion-title>
+  <ion-buttons end>
+    <button>
+      {{currencyName}} {{balance}}
+    </button>
+  </ion-buttons>
 </ion-navbar>
 
 <ion-content class="settings">
   <ion-list>
     <ion-item (click)="doLogout()">
       <ion-icon name="log-out" item-left></ion-icon>
-        <div class="item-inner">
-          Log-out
-        </div>
+      Log-out
+    </ion-item>
+    <ion-item (click)="refreshBalance()">
+      <ion-icon name="refresh-circle" item-left></ion-icon>
+      Refresh balance
     </ion-item>
   </ion-list>
 </ion-content>
