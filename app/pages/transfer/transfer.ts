@@ -3,6 +3,7 @@ import {OnInit, Input} from 'angular2/core';
 import {HttpGet} from '../shared/get';
 import {HttpPost} from '../shared/post';
 import {AuthCommonJwt} from '../shared/commonJwt';
+import {Toast} from 'ionic-native';
 
 @Page({
   templateUrl: 'build/pages/transfer/transfer.html',
@@ -30,7 +31,7 @@ export class Transfer implements OnInit  {
     this.currencyName = this._authCommonJwt.getToken('currency_name');
 
     this._events.subscribe('user:balance', (balance) => {
-      this.balance = balance[0];
+      this.balance = parseFloat(balance[0]).toFixed(2);
     });
   }
 
@@ -68,52 +69,62 @@ export class Transfer implements OnInit  {
     let beginTransferTime = performance.now();
     window['plugins'].spinnerDialog.show('', 'Transfering...', true);
 
-    this._httpGet.transferBalance(amount, provider, type)
-      .then(status => {
-      let bool: boolean = status;
-      let response: any = <any> bool;
+    if (provider === 'PT') {
+      this._httpGet.transferBalancePT(amount, 'inMobile', type)
+        .then(status => {
 
-      if (response.data.transferStatus === 1) {
-        if (type === 'deposit') {
-          self.intBalance = parseFloat(self.balance) - amount;
-          self.balance = self.intBalance.toFixed(2);
-          self._authCommonJwt.setToken('balance', self.balance);
-          this._events.publish('user:balance', self.balance);
-          /**
-           * Tweak the launch game
-           */
-          window['plugins'].spinnerDialog.hide();
-          this.launchGame();
-        } else if (type === 'withdraw') {
-          self.intBalance = parseFloat(self.balance) + parseFloat(amount);
-          self.balance    = self.intBalance.toFixed(2);
-          self._authCommonJwt.setToken('balance', self.balance);
-          this._events.publish('user:balance', self.balance);
-          window['plugins'].spinnerDialog.hide();
+        })
+        .catch(error => {
+          
+        });
+    } else {
+      this._httpGet.transferBalance(amount, provider, type)
+        .then(status => {
+        let bool: boolean = status;
+        let response: any = <any> bool;
+
+        if (response.data.transferStatus === 1) {
+          if (type === 'deposit') {
+            self.intBalance = parseFloat(self.balance) - amount;
+            self.balance = self.intBalance.toFixed(2);
+            self._authCommonJwt.setToken('balance', self.balance);
+            this._events.publish('user:balance', self.balance);
+            /**
+             * Tweak the launch game
+             */
+            window['plugins'].spinnerDialog.hide();
+            this.launchGame();
+          } else if (type === 'withdraw') {
+            self.intBalance = parseFloat(self.balance) + parseFloat(amount);
+            self.balance    = self.intBalance.toFixed(2);
+            self._authCommonJwt.setToken('balance', self.balance);
+            this._events.publish('user:balance', self.balance);
+            window['plugins'].spinnerDialog.hide();
+          }
         }
-      }
-    })
-    .catch(error => {
-      let endTransferTime = performance.now();
-      let meanTransferTime = endTransferTime - beginTransferTime;
-      let timeoutTimer = 0;
-      console.log(error);
+      })
+      .catch(error => {
+        let endTransferTime = performance.now();
+        let meanTransferTime = endTransferTime - beginTransferTime;
+        let timeoutTimer = 0;
+        console.log(error);
 
-      if (meanTransferTime < 2000) {
-        timeoutTimer = 2000 - meanTransferTime;
-      }
-
-      setTimeout(function() {
-        let message = null;
-        if (error.jsonBody && error.jsonBody.message === 'no_enough_credit') {
-          message = 'Not Enough Credit';
-        } else {
-          message = 'Something went wrong. Please try again...';
+        if (meanTransferTime < 2000) {
+          timeoutTimer = 2000 - meanTransferTime;
         }
-        window['plugins'].spinnerDialog.hide();
-        window['plugins'].spinnerDialog.show('', message);
-      }, timeoutTimer);
-    });
+
+        setTimeout(function() {
+          let message = null;
+          if (error.jsonBody && error.jsonBody.message === 'no_enough_credit') {
+            message = 'Not Enough Credit';
+          } else {
+            message = 'Something went wrong. Please try again...';
+          }
+          window['plugins'].spinnerDialog.hide();
+          window['plugins'].spinnerDialog.show('', message);
+        }, timeoutTimer);
+      });
+    }
   }
 
   chooseProvider(deposit, type) {
@@ -131,6 +142,12 @@ export class Transfer implements OnInit  {
         type: 'radio',
         label: 'Oriental Gaming',
         value: 'OG'
+      });
+
+      alert.addInput({
+        type: 'radio',
+        label: 'PlayTech',
+        value: 'PT'
       });
 
       alert.addButton('Cancel');
@@ -194,11 +211,16 @@ export class Transfer implements OnInit  {
       });
 
       urlWindow.addEventListener('loaderror', function(event) {
-        window['plugins'].spinnerDialog.show('', 'Something went wrong. Please try again');
+        Toast.show('Something went wrong. Please try again', '2000', 'center').subscribe(
+          toast => {
+          });
       });
+
     })
     .catch(error => {
-      window['plugins'].spinnerDialog.show('', 'Something went wrong. Please try again');
+      Toast.show('Something went wrong. Please try again', '2000', 'center').subscribe(
+        toast => {
+        });
     });
   }
 }

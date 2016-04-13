@@ -44,6 +44,27 @@ export class HttpGet {
     })
   }
 
+  transferBalancePT(amount, gameType, bankType) {
+    let header = new Headers();
+    header.append('Authorization', this._authJwtToken.getToken());
+
+    return new Promise<boolean>((resolve, reject) => {
+      oboe({
+        url     : 'http://192.168.1.212:3002/api_v1/user/transfer/balance/PT/' + gameType + '?amount=' + amount + '&bankType=' + bankType,
+        method  : 'GET',
+        headers : header
+      })
+      .done(user => {
+        if (user.data) {
+          resolve(user);
+        }
+      })
+      .fail(error => {
+        reject(error);
+      });
+    })
+  }
+
   checkBalance() {
     let header = new Headers();
     header.append('Authorization', this._authJwtToken.getToken());

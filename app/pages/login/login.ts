@@ -4,7 +4,7 @@ import {TabsPage} from '../tabs/tabs';
 import {HttpGet} from '../shared/get';
 import {AuthJwtToken} from '../shared/jwt';
 import {AuthCommonJwt} from '../shared/commonJwt';
-
+import {Toast} from 'ionic-native';
 
 interface UserCredentials {
   name: string,
@@ -70,7 +70,10 @@ export class Login implements OnInit  {
         } else {
           errorName = 'Something went wrong. Please try again';
         }
-        window['plugins'].spinnerDialog.show('Login', errorName);
+
+        Toast.show(errorName, 'short', 'center').subscribe(
+         toast => {
+         });
       });
   }
 }

@@ -29,7 +29,7 @@ export class Settings implements OnInit  {
     this.currencyName = this._authCommonJwt.getToken('currency_name');
 
     this._events.subscribe('user:balance', (balance) => {
-      this.balance = balance[0];
+      this.balance = parseFloat(balance[0]).toFixed(2);
     });
   }
 
@@ -56,11 +56,12 @@ export class Settings implements OnInit  {
             this._authCommonJwt.setToken('balance', response.data);
             this.balance = response.data;
             this._events.publish('user:balance', this.balance);
-          }
-        );
+          });
       })
       .catch(error => {
-        window['plugins'].spinnerDialog.show('', 'Something went wrong...');
+        Toast.show('Something went wrong...', '2000', 'center').subscribe(
+          toast => {
+          });
       });
   }
 }
