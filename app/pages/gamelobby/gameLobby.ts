@@ -27,7 +27,7 @@ export class GameLobby implements OnInit {
     this.balance      = this._authCommonJwt.getToken('balance');
     this.currencyName = this._authCommonJwt.getToken('currency_name');
     this._events.subscribe('user:balance', (balance) => {
-      this.balance = balance[0];
+      this.balance = parseFloat(balance[0]).toFixed(2);
     });
   }
 
@@ -61,7 +61,9 @@ export class GameLobby implements OnInit {
         urlWindow.addEventListener('loaderror', function(event) {
           console.log('loaderror');
           urlWindow.close();
-          window['plugins'].spinnerDialog.show('', 'Server Error. Please try again...');
+          Toast.show('Server Error. Please try again...', 'short', 'center').subscribe(
+            toast => {
+            });
         });
     });
   }
