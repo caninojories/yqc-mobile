@@ -55,7 +55,29 @@ export class Transfer implements OnInit  {
         }, {
           text: 'Ok',
           handler: deposit => {
-            this.chooseProvider(deposit, 'deposit');
+            /**
+             * check if we have enough balance to deposit
+             */
+            if (!!!deposit.amount) {
+              Toast.show('Please Input a valid amount', '2000', 'center').subscribe(
+                toast => {
+                });
+              return;
+            }
+            if (parseFloat(this.balance) < parseFloat(deposit.amount)) {
+              Toast.show('Not Enough Credit!', '2000', 'center').subscribe(
+                toast => {
+                });
+
+              return;
+            }
+            if (parseFloat(deposit.amount) < 1) {
+              Toast.show('Please Input a valid amount', '2000', 'center').subscribe(
+                toast => {
+                });
+            } else {
+              this.chooseProvider(deposit, 'deposit');
+            }
           }
         }
       ]
@@ -72,10 +94,29 @@ export class Transfer implements OnInit  {
     if (provider === 'PT') {
       this._httpGet.transferBalancePT(amount, 'inMobile', type)
         .then(status => {
+          if (type === 'deposit') {
+            self.intBalance = parseFloat(self.balance) - amount;
+            self.balance = self.intBalance.toFixed(2);
+            self._authCommonJwt.setToken('balance', self.balance);
+            this._events.publish('user:balance', self.balance);
+            window['plugins'].spinnerDialog.hide();
+            Toast.show('Deposit Success!', '2000', 'center').subscribe(
+              toast => {
+              });
+          } else if (type === 'withdraw') {
+            self.intBalance = parseFloat(self.balance) + parseFloat(amount);
+            self.balance    = self.intBalance.toFixed(2);
+            self._authCommonJwt.setToken('balance', self.balance);
+            this._events.publish('user:balance', self.balance);
 
+            window['plugins'].spinnerDialog.hide();
+            Toast.show('Withdraw Success!', '2000', 'center').subscribe(
+              toast => {
+              });
+          }
         })
         .catch(error => {
-          
+
         });
     } else {
       this._httpGet.transferBalance(amount, provider, type)
@@ -99,7 +140,11 @@ export class Transfer implements OnInit  {
             self.balance    = self.intBalance.toFixed(2);
             self._authCommonJwt.setToken('balance', self.balance);
             this._events.publish('user:balance', self.balance);
+
             window['plugins'].spinnerDialog.hide();
+            Toast.show('Withdraw Success!', '2000', 'center').subscribe(
+              toast => {
+              });
           }
         }
       })
@@ -120,8 +165,11 @@ export class Transfer implements OnInit  {
           } else {
             message = 'Something went wrong. Please try again...';
           }
+
           window['plugins'].spinnerDialog.hide();
-          window['plugins'].spinnerDialog.show('', message);
+          Toast.show(message, '2000', 'center').subscribe(
+            toast => {
+            });
         }, timeoutTimer);
       });
     }
@@ -183,7 +231,13 @@ export class Transfer implements OnInit  {
         {
           text: 'Ok',
           handler: deposit => {
-            this.chooseProvider(deposit, 'withdraw');
+            if (parseFloat(deposit.amount) < 1) {
+              Toast.show('Please Input a valid amount', '2000', 'center').subscribe(
+                toast => {
+                });
+            } else {
+              this.chooseProvider(deposit, 'withdraw');
+            }
           }
         }
       ]
@@ -208,6 +262,9 @@ export class Transfer implements OnInit  {
       urlWindow.addEventListener('loadstop', function(event) {
         urlWindow.close();
         window['plugins'].spinnerDialog.hide();
+        Toast.show('Deposit Success!', '2000', 'center').subscribe(
+          toast => {
+          });
       });
 
       urlWindow.addEventListener('loaderror', function(event) {

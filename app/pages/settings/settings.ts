@@ -25,7 +25,7 @@ export class Settings implements OnInit  {
   @Input() currencyName: string = null;
 
   ngOnInit() {
-    this.balance      = this._authCommonJwt.getToken('balance');
+    this.balance      = parseFloat(this._authCommonJwt.getToken('balance')).toFixed(2);
     this.currencyName = this._authCommonJwt.getToken('currency_name');
 
     this._events.subscribe('user:balance', (balance) => {
@@ -51,10 +51,10 @@ export class Settings implements OnInit  {
          * Listener for changing the balance
          */
         window['plugins'].spinnerDialog.hide();
+        this.balance = parseFloat(response.data).toFixed(2);
         Toast.show('Success', '2000', 'center').subscribe(
           toast => {
             this._authCommonJwt.setToken('balance', response.data);
-            this.balance = response.data;
             this._events.publish('user:balance', this.balance);
           });
       })

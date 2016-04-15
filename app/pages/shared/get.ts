@@ -1,6 +1,7 @@
 import {Injectable} from 'angular2/core';
 import {Headers} from 'angular2/http';
 import {AuthJwtToken} from './jwt';
+import {CONFIG} from './config';
 
 declare var oboe;
 
@@ -11,7 +12,7 @@ export class HttpGet {
 
   login(user) {
     return new Promise<boolean>((resolve, reject) => {
-      oboe('http://192.168.1.212:3002/api_v1/user/login?account_id='+ user.name + '&password=' + user.password)
+      oboe(CONFIG.hostName + '/api_v1/user/login?account_id='+ user.name + '&password=' + user.password)
         .done(user => {
           if (user.data) {
             resolve(user);
@@ -29,7 +30,7 @@ export class HttpGet {
 
     return new Promise<boolean>((resolve, reject) => {
       oboe({
-        url     : 'http://192.168.1.212:3002/api_v1/user/transfer/balance/' + provider + '?amount=' + amount + '&type=' + type,
+        url     : CONFIG.hostName + '/api_v1/user/transfer/balance/' + provider + '?amount=' + amount + '&type=' + type,
         method  : 'GET',
         headers : header
       })
@@ -50,7 +51,7 @@ export class HttpGet {
 
     return new Promise<boolean>((resolve, reject) => {
       oboe({
-        url     : 'http://192.168.1.212:3002/api_v1/user/transfer/balance/PT/' + gameType + '?amount=' + amount + '&bankType=' + bankType,
+        url     : CONFIG.hostName + '/api_v1/user/transfer/balance/PT/' + gameType + '?amount=' + amount + '&bankType=' + bankType,
         method  : 'GET',
         headers : header
       })
@@ -71,7 +72,7 @@ export class HttpGet {
 
     return new Promise<boolean>((resolve, reject) => {
       oboe({
-        url     : 'http://192.168.1.212:3002/api_v1/user/balance',
+        url     : CONFIG.hostName + '/api_v1/user/balance',
         method  : 'GET',
         headers : header
       })

@@ -1,6 +1,7 @@
 import { Injectable } from 'angular2/core';
 import {Headers} from 'angular2/http';
 import {AuthJwtToken} from './jwt';
+import {CONFIG} from './config';
 
 declare var oboe;
 
@@ -15,7 +16,7 @@ export class HttpPost {
 
     return new Promise<boolean>((resolve, reject) => {
       oboe({
-        url     : 'http://192.168.1.212:3002/api_v1/user/launch/game/' + provider,
+        url     : CONFIG + '/api_v1/user/launch/game/' + provider,
         method  : 'POST',
         headers : header
       })

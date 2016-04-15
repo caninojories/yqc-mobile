@@ -66,7 +66,7 @@ export class Login implements OnInit  {
         let errorName = null;
         console.log(error);
         if (error.jsonBody && error.jsonBody.message === 'User Cannot Be Found') {
-          errorName = 'Please try again...'
+          errorName = 'Invalid Username/Password!'
         } else {
           errorName = 'Something went wrong. Please try again';
         }

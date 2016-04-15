@@ -24,7 +24,7 @@ export class GameLobby implements OnInit {
   @Input() currencyName: string = null;
 
   ngOnInit() {
-    this.balance      = this._authCommonJwt.getToken('balance');
+    this.balance      = parseFloat(this._authCommonJwt.getToken('balance')).toFixed(2);
     this.currencyName = this._authCommonJwt.getToken('currency_name');
     this._events.subscribe('user:balance', (balance) => {
       this.balance = parseFloat(balance[0]).toFixed(2);
