@@ -231,6 +231,16 @@ export class Transfer implements OnInit  {
         {
           text: 'Ok',
           handler: deposit => {
+            /**
+             * check if we have enough balance to deposit
+             */
+            if (!!!deposit.amount) {
+              Toast.show('Please Input a valid amount', '2000', 'center').subscribe(
+                toast => {
+                });
+              return;
+            }
+
             if (parseFloat(deposit.amount) < 1) {
               Toast.show('Please Input a valid amount', '2000', 'center').subscribe(
                 toast => {
