@@ -1,22 +1,22 @@
-import { Injectable } from 'angular2/core';
+import {Injectable} from 'angular2/core';
 import {Headers} from 'angular2/http';
-import {AuthJwtToken} from './jwt';
-import {CONFIG} from './config';
+import {AuthJwtToken} from './../jwt';
+import {CONFIG} from './../../shared/config';
 
 declare var oboe;
 
 @Injectable()
-export class HttpPost {
+export class HttpPostPlaytech {
   constructor(private _authJwtToken: AuthJwtToken) {
   }
 
-  gameLauncher(provider) {
+  transferBalancePT(amount, gameType, bankType) {
     let header = new Headers();
     header.append('Authorization', this._authJwtToken.getToken());
 
     return new Promise<boolean>((resolve, reject) => {
       oboe({
-        url     : CONFIG.hostName + '/api_v1/user/launch/game/' + provider,
+        url     : CONFIG.hostName + '/api_v1/user/transfer/balance/PT/' + gameType + '?amount=' + amount + '&bankType=' + bankType,
         method  : 'POST',
         headers : header
       })
@@ -25,9 +25,9 @@ export class HttpPost {
           resolve(user);
         }
       })
-      .fail(error => {
+      .fail((error) => {
         reject(error);
       });
-    });
+    })
   }
 }

@@ -5,11 +5,20 @@ import {HttpPost} from '../shared/post';
 import {AuthCommonJwt} from '../shared/commonJwt';
 import {Toast} from 'ionic-native';
 
+/**
+ * Shared
+ */
+import {HttpPostPlaytech} from '../shared/playtech/post';
+import {HttpPostCommons} from '../shared/commons/post';
+
+
 @Page({
   templateUrl: 'build/pages/transfer/transfer.html',
   providers: [
     HttpGet,
-    HttpPost
+    HttpPost,
+    HttpPostPlaytech,
+    HttpPostCommons
   ]
 })
 export class Transfer implements OnInit  {
@@ -18,6 +27,8 @@ export class Transfer implements OnInit  {
     private _nav: NavController,
     private _httpGet: HttpGet,
     private _httpPost: HttpPost,
+    private _httpPostPlaytech: HttpPostPlaytech,
+    private _httpPostCommons: HttpPostCommons,
     private _authCommonJwt: AuthCommonJwt) {}
 
   @Input() balance: string = null;
@@ -92,7 +103,7 @@ export class Transfer implements OnInit  {
     window['plugins'].spinnerDialog.show('', 'Transfering...', true);
 
     if (provider === 'PT') {
-      this._httpGet.transferBalancePT(amount, 'inMobile', type)
+      this._httpPostPlaytech.transferBalancePT(amount, 'inMobile', type)
         .then(status => {
           if (type === 'deposit') {
             self.intBalance = parseFloat(self.balance) - amount;
@@ -116,10 +127,14 @@ export class Transfer implements OnInit  {
           }
         })
         .catch(error => {
-
+          window['plugins'].spinnerDialog.hide();
+          Toast.show('Something went wrong!', '2000', 'center').subscribe(
+            toast => {
+              window['plugins'].spinnerDialog.hide();
+            });
         });
     } else {
-      this._httpGet.transferBalance(amount, provider, type)
+      this._httpPostCommons.transferBalance(amount, provider, type)
         .then(status => {
         let bool: boolean = status;
         let response: any = <any> bool;
@@ -134,7 +149,10 @@ export class Transfer implements OnInit  {
              * Tweak the launch game
              */
             window['plugins'].spinnerDialog.hide();
-            this.launchGame();
+            // this.launchGame();
+            Toast.show('Deposit Success!', '2000', 'center').subscribe(
+              toast => {
+              });
           } else if (type === 'withdraw') {
             self.intBalance = parseFloat(self.balance) + parseFloat(amount);
             self.balance    = self.intBalance.toFixed(2);
@@ -267,7 +285,6 @@ export class Transfer implements OnInit  {
       let response: any = <any> bool;
 
       this.URL = response.data.url;
-      console.log(this.URL);
       let urlWindow = window.open(this.URL,'_blank', 'hardware=no,location=no,clearcache=yes,hidden=yes');
       urlWindow.addEventListener('loadstop', function(event) {
         urlWindow.close();

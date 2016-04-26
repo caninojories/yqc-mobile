@@ -51,6 +51,7 @@ export class GameLobby implements OnInit {
             toast => {
             });
         });
+        
         urlWindow.addEventListener('loadstop', function(event) {
           Toast.hide()
             .then(function(message) {

@@ -42,6 +42,15 @@ export class Settings implements OnInit  {
 
   refreshBalance() {
     window['plugins'].spinnerDialog.show('', 'Checking...', true);
+
+    let notify = setTimeout(function() {
+      window['plugins'].spinnerDialog.hide();
+      Toast.show('Something went wrong...', '2000', 'center').subscribe(
+        toast => {
+          return;
+        });
+    }, 30000)
+
     this._httpGet.checkBalance()
       .then(user => {
         let bool: boolean = user;
@@ -56,11 +65,16 @@ export class Settings implements OnInit  {
           toast => {
             this._authCommonJwt.setToken('balance', response.data);
             this._events.publish('user:balance', this.balance);
+
+            clearTimeout(notify);
           });
       })
       .catch(error => {
+        window['plugins'].spinnerDialog.hide();
         Toast.show('Something went wrong...', '2000', 'center').subscribe(
           toast => {
+            window['plugins'].spinnerDialog.hide();
+            clearTimeout(notify);
           });
       });
   }
