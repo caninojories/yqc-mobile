@@ -1,7 +1,7 @@
 import {Page, NavController} from 'ionic-angular';
 import {OnInit} from 'angular2/core';
 import {TabsPage} from '../tabs/tabs';
-import {HttpGet} from '../shared/get';
+import {HttpPost} from '../shared/post';
 import {AuthJwtToken} from '../shared/jwt';
 import {AuthCommonJwt} from '../shared/commonJwt';
 import {Toast} from 'ionic-native';
@@ -14,7 +14,7 @@ interface UserCredentials {
 @Page({
   templateUrl: 'build/pages/login/login.html',
   providers: [
-    HttpGet,
+    HttpPost,
     AuthJwtToken
   ]
 })
@@ -26,7 +26,7 @@ export class Login implements OnInit  {
 
   constructor(
     private _nav: NavController,
-    private _httpGet: HttpGet,
+    private _httpPost: HttpPost,
     private _authJwtToken: AuthJwtToken,
     private _authCommonJwt: AuthCommonJwt) {
     this._nav = _nav;
@@ -42,7 +42,7 @@ export class Login implements OnInit  {
   goToTabs() {
     window['plugins'].spinnerDialog.show('Login', 'Please wait...', true);
     let self = this;
-    this._httpGet.login(this.user)
+    this._httpPost.login(this.user)
       .then(user => {
         let bool: boolean = user;
         let response: any = <any> bool;
